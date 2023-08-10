@@ -1,4 +1,10 @@
 # Module 2 review
+
+## Table of Contents
+
+1. [Initialize a project from scratch](#from-scratch-initialize-a-new-project-with-packages)
+2. [Clone a project with packages (not from scratch)](#not-from-scratch-cloned-project-with-packages)
+3. [Server setup](#server-setup)
 ### FROM SCRATCH Initialize a new project with packages 
 
 - Create a new project folder
@@ -61,16 +67,16 @@ MONGODB_URI="mongodb://yourMongoURLWithUserAndPassword/your-db-name"
 
 You are done with the initialization. Now you can start coding!
 
-## Server setup
+# Server setup
 
 When we create a server, we have a lot of things to do. We need to create the server, connect to the database, create the routes, etc.
 
-### Create the server
+## Create the server
 Server will be created normally in the `server.js` file.
 In our projects, we have a few files to help us with the server setup. 
 Check the portal lesson for more details: [Ironlauncher setup](https://my.ironhack.com/lms/courses/course-v1:IRONHACK+WDFT+202307_BCN/modules/ironhack-course-chapter_6/units/ironhack-course-chapter_6-sequential_1-vertical_1)
 
-### Connect to the database
+## Connect to the database
 We need to connect to the database in order to be able to use it.
 The default setup for ironlauncher is to have the database connection in `db/index.js` file.
 
@@ -89,7 +95,7 @@ const MONGO_URI = process.env.MONGODB_URI;
 
 Notice the name of the environment variable and the name of the variable in the `db/index.js` file are not the same. Be careful with that when you add the variable to the .env file.
 
-### Create the routes
+## Create the routes
 One of the most important things we need to do is to create the routes.
 
 It is a good practice to divede the routes in different files. For example, we can have a `routes/auth.routes.js` file to handle all the routes related to authentication and some book routes in a `routes/books.routes.js` file.
@@ -102,7 +108,7 @@ const authRoutes = require("./routes/auth.routes");
 app.use("/", authRoutes);
 ```
 
-#### Different types of routes
+## Different types of routes
 We can use routes to display information in the browser, to create new information in the database, to update information in the database, to delete information from the database, etc.
 
 To have in mind which type of route we are creating, we can use the following convention:
@@ -122,7 +128,75 @@ Notice in the example we add the books/:id route at the end. This is because the
 
 Once we have the table with the routes we need, we can start creating them in the routes folder.
 
-#### Display information in the browser
+## Models and Schemas
+We need to create a model for each collection we want to have in the database. For example, if we have a books collection, we need to create a Book model.
+
+The model is going to be a class that extends the `mongoose.Schema` class. We need to add the properties we want to have in the model and the type of each property.
+
+Example of a Book model:
+```js
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+const bookSchema = new Schema({
+  title: String,
+  author: String,
+  description: String,
+  rating: Number,
+});
+
+const Book = mongoose.model("Book", bookSchema);
+
+module.exports = Book;
+```
+This way we are telling our database that we want to have a collection called "books" with documents that have a title, author, description and rating. We can specify the type of each property. For example, the rating is going to be a number. And we can also specify if a property is required or not.
+
+### Required properties
+
+If we want a property to be required, we need to add the `required: true` option to the property.
+
+Example of a Book model with required properties:
+```js
+const bookSchema = new Schema({
+  title: { type: String, required: true }
+});
+```
+
+### Default values
+
+If we want a property to have a default value, we need to add the `default` option to the property. When we create a new document, if we don't specify a value for that property, it will have the default value.
+
+Example of a Book model with default values:
+```js
+const bookSchema = new Schema({
+  title: { type: String, default: "Unknown" }
+});
+```
+
+### Unique values
+
+If we want a property to have a unique value, we need to add the `unique` option to the property. No other document in the collection will be able to have the same value for that property.
+
+Example of a Book model with unique values:
+```js
+const bookSchema = new Schema({
+  title: { type: String, unique: true }
+});
+```
+
+### Enum values
+
+If we want a property to have a specific set of values, we need to add the `enum` option to the property.
+If we send a value that is not in the enum array, we will get an error.
+
+Example of a Book model with enum values:
+```js
+const bookSchema = new Schema({
+  title: { type: String, enum: ["Fiction", "Non-fiction"] }
+});
+```
+
+## Display information in the browser
 
 Every time you want to display information in the browser, you need to create a GET route.
 
@@ -136,7 +210,7 @@ router.get("/", (req, res) => {
 });
 ```
 
-#### Create new information in the database
+## Create new information in the database
 
 Every time you want to create new information in the database, you need to create a POST route.
 To collect the information of a form with a POST route, we need to use the `req.body` object.
